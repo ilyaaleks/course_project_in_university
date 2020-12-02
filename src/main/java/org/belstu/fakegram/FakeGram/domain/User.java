@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,16 +17,17 @@ import java.util.Set;
 @NoArgsConstructor
 public class User{
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    private long id;
+    private String id;
     private String name;
-    private String surname;
+    private String userpic;
     private String email;
+    private String gender;
+    private String locale;
+    private LocalDateTime lastVisit;
     @Column(name = "user_description")
     private String userDescription;
     private String login;
     private String password;
-    private String role;
     private String status;
     @Column(name="photo_url")
     private String photoUrl;
