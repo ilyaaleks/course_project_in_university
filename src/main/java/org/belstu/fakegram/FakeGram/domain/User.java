@@ -4,8 +4,18 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
-import java.time.LocalDateTime;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,17 +27,18 @@ import java.util.Set;
 @NoArgsConstructor
 public class User{
     @Id
-    private String id;
+    @GeneratedValue(strategy= GenerationType.AUTO)
+    private long id;
+    private String lastName;
     private String name;
-    private String userpic;
+    private String username;
+    private String password;
     private String email;
-    private String gender;
-    private String locale;
-    private LocalDateTime lastVisit;
     @Column(name = "user_description")
     private String userDescription;
-    private String login;
-    private String password;
+    private boolean activate;
+    private String role;
+    private String activationCode;
     private String status;
     @Column(name="photo_url")
     private String photoUrl;
@@ -35,8 +46,6 @@ public class User{
     private List<Mark> marks;
     @OneToMany(mappedBy = "author",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<Post> posts;
-    @OneToMany(mappedBy = "author",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-    private List<Claim> claims;
     @ManyToMany
     @JoinTable(
             name="user_subscriptions",

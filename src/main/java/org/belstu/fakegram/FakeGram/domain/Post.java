@@ -35,8 +35,6 @@ public class Post {
     private String photoPath;
     private String text;
     private Date date;
-    @OneToMany(mappedBy = "post",cascade = CascadeType.ALL,fetch = FetchType.EAGER)
-    private Set<Claim> claims;
     @ManyToMany(mappedBy = "posts",cascade = CascadeType.ALL, fetch= FetchType.EAGER)
     private Set<HashTag> hashTags;
     @OneToMany(mappedBy = "postComment",cascade = CascadeType.ALL,fetch = FetchType.EAGER)

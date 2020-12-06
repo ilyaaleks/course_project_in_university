@@ -1,54 +1,60 @@
 package org.belstu.fakegram.FakeGram.config;
 
-import org.belstu.fakegram.FakeGram.domain.User;
-import org.belstu.fakegram.FakeGram.repository.UserRepository;
-import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
+import org.belstu.fakegram.FakeGram.security.JwtAuthenticationEntryPoint;
+import org.belstu.fakegram.FakeGram.security.JwtAuthenticationFilter;
+import org.belstu.fakegram.FakeGram.service.impl.MyUserDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-
-import java.time.LocalDateTime;
-import java.util.Map;
-
-import static org.belstu.fakegram.FakeGram.config.EndpointKeys.HOME_ENDPOINT;
-import static org.belstu.fakegram.FakeGram.config.UserOauthKeys.EMAIL;
-import static org.belstu.fakegram.FakeGram.config.UserOauthKeys.GENDER;
-import static org.belstu.fakegram.FakeGram.config.UserOauthKeys.ID;
-import static org.belstu.fakegram.FakeGram.config.UserOauthKeys.LOCALE;
-import static org.belstu.fakegram.FakeGram.config.UserOauthKeys.NAME;
-import static org.belstu.fakegram.FakeGram.config.UserOauthKeys.PICTURE;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-@EnableOAuth2Sso
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    private MyUserDetailsService userDetailsService;
+    private JwtAuthenticationEntryPoint unauthorizedHandler;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final String[] ENDPOINTS={"api/auth/**", "/signup","api/registration/**","api/image/**"};
+
+    public WebSecurityConfig(MyUserDetailsService userDetailsService, JwtAuthenticationEntryPoint unauthorizedHandler, BCryptPasswordEncoder bCryptPasswordEncoder, JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.userDetailsService = userDetailsService;
+        this.unauthorizedHandler = unauthorizedHandler;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().mvcMatchers(HOME_ENDPOINT).permitAll()
-                .anyRequest().authenticated().and().csrf().disable();
-    }
-
     @Bean
-    public PrincipalExtractor principalExtractor(UserRepository userRepository) {
-        return map -> {
-            final String id = String.valueOf(map.get(ID));
-            final User user = userRepository.findById(id).orElseGet(() -> fillUser(map));
-            user.setLastVisit(LocalDateTime.now());
-            return userRepository.save(user);
-        };
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 
-    private User fillUser(Map<String, Object> userDetails) {
-        User user = new User();
-        user.setId(String.valueOf(userDetails.get(ID)));
-        user.setName(String.valueOf(userDetails.get(NAME)));
-        user.setEmail(String.valueOf(userDetails.get(EMAIL)));
-        user.setGender(String.valueOf(userDetails.get(GENDER)));
-        user.setLocale(String.valueOf(userDetails.get(LOCALE)));
-        user.setLocale(String.valueOf(userDetails.get(PICTURE)));
-        return user;
+    @Autowired
+    public void globalUserDetails(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
+    }
+
+
+
+
+
+    @Override
+    public void configure(HttpSecurity http) throws Exception {
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.cors().and().csrf().disable()
+                .authorizeRequests()
+                .antMatchers(ENDPOINTS).permitAll()
+                .and()
+                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
+                .and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 }

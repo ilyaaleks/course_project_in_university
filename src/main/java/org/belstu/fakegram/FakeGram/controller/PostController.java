@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:4200/", allowedHeaders = "*")
 @RestController
@@ -24,7 +25,7 @@ import java.io.IOException;
 public class PostController {
     private PostService postService;
     @PostMapping("/posts")
-    public PostDto savePost(@RequestParam(name = "file") MultipartFile file,//можно ли возвращать object?
+    public PostDto savePost(@RequestParam(name = "file") MultipartFile file,
                             @RequestParam String authorLogin,
                             @RequestParam String hashTags,
                             @RequestParam String text) throws IOException {
@@ -45,7 +46,7 @@ public class PostController {
     @GetMapping("/userposts/{userId}")
     public PostPageDto getUserPosts(@PathVariable() long userId,
                                     Pageable page) {
-        postService.getUserPosts(userId, page);
+        final List<Post> userPosts = postService.getUserPosts(userId, page);
         return
     }
 

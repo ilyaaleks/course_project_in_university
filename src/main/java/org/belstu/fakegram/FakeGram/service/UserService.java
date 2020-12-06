@@ -1,20 +1,28 @@
 package org.belstu.fakegram.FakeGram.service;
 
 import org.belstu.fakegram.FakeGram.domain.User;
+import org.belstu.fakegram.FakeGram.dto.UserDto;
+import org.belstu.fakegram.FakeGram.dto.UserPageDto;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Set;
-
 public interface UserService {
-    Set<User> getSubscribers(long userId, Pageable page);
+    UserPageDto getSubscribers(long userId, Pageable page);
 
-    Set<User> getSubscriptions(long userId, Pageable page);
+    UserPageDto getSubscriptions(long userId, Pageable page);
 
     int getCountOfSubscribers(long userId);
 
-    int getCountOfSubscribtions(long userId);
+    int getCountOfSubscriptions(long userId);
 
-    User subscribe(int userId, String id);
+    User subscribe(long userId, long id);
 
-    User unsubscribe(int userId, String id);
+    User unsubscribe(long userId, long id);
+
+    User findByUsername(String username);
+
+    User register(UserDto user);
+
+    User activateUser(String code);
+
+    User updateUser(UserDto userDto);
 }

@@ -7,11 +7,11 @@ import java.util.Date;
 
 @Builder
 @Data
-public class CommentDto {
+public class ClaimDto {
     private long id;
-    private String text;
-    private Date date;
     private long postId;
-    private String userId;
-    private String authorPhotoPath;
+    private Date date;
+    private String reason;
+    private String status;
+    private String authorId;
 }
