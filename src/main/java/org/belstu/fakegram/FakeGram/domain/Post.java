@@ -3,6 +3,8 @@ package org.belstu.fakegram.FakeGram.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -24,16 +26,21 @@ import java.util.Set;
 @AllArgsConstructor
 @Data
 @NoArgsConstructor
+@RequiredArgsConstructor
 public class Post {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private long id;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="user_id")
+    @NonNull
     private User author;
     @Column(name = "photo_path")
+    @NonNull
     private String photoPath;
+    @NonNull
     private String text;
+    @NonNull
     private Date date;
     @ManyToMany(mappedBy = "posts",cascade = CascadeType.ALL, fetch= FetchType.EAGER)
     private Set<HashTag> hashTags;

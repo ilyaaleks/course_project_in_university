@@ -1,9 +1,11 @@
 package org.belstu.fakegram.FakeGram.service;
 
 import org.belstu.fakegram.FakeGram.domain.User;
+import org.belstu.fakegram.FakeGram.dto.ImagePath;
 import org.belstu.fakegram.FakeGram.dto.UserDto;
 import org.belstu.fakegram.FakeGram.dto.UserPageDto;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
     UserPageDto getSubscribers(long userId, Pageable page);
@@ -25,4 +27,8 @@ public interface UserService {
     User activateUser(String code);
 
     User updateUser(UserDto userDto);
+
+    User findById(long id);
+
+    ImagePath updatePhoto(MultipartFile file, String username);
 }

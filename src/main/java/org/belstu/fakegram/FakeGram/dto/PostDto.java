@@ -1,19 +1,32 @@
 package org.belstu.fakegram.FakeGram.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Date;
 import java.util.Set;
 
 @Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@RequiredArgsConstructor
 public class PostDto {
+    @NonNull
     private long id;
-    private String authorId;
+    @NonNull
+    private long authorId;
+    @NonNull
     private String authorLogin;
+    @NonNull
     private String photoPath;
+    @NonNull
     private String text;
+    @NonNull
     private Date date;
     private String authorPhotoPath;
     private Set<HashTagDto> hashTags;

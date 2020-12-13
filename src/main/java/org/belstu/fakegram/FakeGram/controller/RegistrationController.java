@@ -1,5 +1,6 @@
 package org.belstu.fakegram.FakeGram.controller;
 
+import lombok.AllArgsConstructor;
 import org.belstu.fakegram.FakeGram.dto.UserDto;
 import org.belstu.fakegram.FakeGram.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -16,23 +17,21 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("api/registration")
+@AllArgsConstructor
 public class RegistrationController {
     public UserService userService;
 
-    public RegistrationController(UserService userService) {
-        this.userService = userService;
-    }
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.OK)
-    public void register(@Valid @RequestBody UserDto user)
-    {
+    public void register(@Valid @RequestBody UserDto user) {
         userService.register(user);
     }
+
     @GetMapping("/activate/{code}")
     @ResponseStatus(value = HttpStatus.OK)
     public void activate(@PathVariable String code) throws IOException {
-      userService.activateUser(code);
+        userService.activateUser(code);
     }
 
 }

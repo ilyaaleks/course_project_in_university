@@ -3,6 +3,8 @@ package org.belstu.fakegram.FakeGram.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -25,22 +27,32 @@ import java.util.Set;
 @AllArgsConstructor
 @Data
 @NoArgsConstructor
+@RequiredArgsConstructor
 public class User{
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private long id;
+    @NonNull
     private String lastName;
+    @NonNull
     private String name;
+    @NonNull
     private String username;
+    @NonNull
     private String password;
+    @NonNull
     private String email;
     @Column(name = "user_description")
+    @NonNull
     private String userDescription;
+    @NonNull
     private boolean activate;
     private String role;
     private String activationCode;
+    @NonNull
     private String status;
     @Column(name="photo_url")
+    @NonNull
     private String photoUrl;
     @OneToMany(mappedBy = "author",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<Mark> marks;

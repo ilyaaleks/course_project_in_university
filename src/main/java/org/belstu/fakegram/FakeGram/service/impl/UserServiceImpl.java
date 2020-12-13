@@ -1,7 +1,9 @@
 package org.belstu.fakegram.FakeGram.service.impl;
 
-import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.belstu.fakegram.FakeGram.domain.User;
+import org.belstu.fakegram.FakeGram.dto.ImagePath;
 import org.belstu.fakegram.FakeGram.dto.UserDto;
 import org.belstu.fakegram.FakeGram.dto.UserPageDto;
 import org.belstu.fakegram.FakeGram.mapper.DtoConverter;
@@ -11,32 +13,44 @@ import org.belstu.fakegram.FakeGram.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.expression.AccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.constraints.NotNull;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
 import static java.util.stream.Collectors.toList;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     @Value("server.url")
-    private final String serverUrl;
+    private String serverUrl;
+    @Value("${upload.path}")
+    private String uploadPath;
+    @NonNull
     private final UserRepository userRepository;
+    @NonNull
     private final DtoConverter converter;
+    @NonNull
     private final BCryptPasswordEncoder passwordEncoder;
+    @NonNull
     private final MailSender mailSender;
+
+
     @Override
     public UserPageDto getSubscribers(long userId, Pageable pageable) {
-        final Page<User> page = userRepository.findSubscribers(userId,pageable);
+        final Page<User> page = userRepository.findSubscribers(userId, pageable);
         final List<User> subscribers = page.getContent();
         final List<UserDto> userDtos = subscribers.stream().map(converter::convertToUserDto).collect(toList());
         return new UserPageDto(userDtos,
@@ -46,7 +60,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserPageDto getSubscriptions(long userId, Pageable pageable) {
-        final Page<User> page = userRepository.findSubscriptions(userId,pageable);
+        final Page<User> page = userRepository.findSubscriptions(userId, pageable);
         final List<User> subscribers = page.getContent();
         final List<UserDto> userDtos = subscribers.stream().map(converter::convertToUserDto).collect(toList());
         return new UserPageDto(userDtos,
@@ -56,39 +70,47 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public int getCountOfSubscribers(long userId) {
-        return userRepository.findById(userId).getSubscriptions().size();
+        return userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "User not found")).getSubscriptions().size();
     }
 
     @Override
     public int getCountOfSubscriptions(long userId) {
-        return userRepository.findById(userId).getSubscribers().size();
+        return userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "User not found")).getSubscribers().size();
     }
 
     @Override
     public User subscribe(long userId, long id) {
-        User user=userRepository.findById(userId);
-        User currentUser=userRepository.findById(id);
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "User not found"));
+        User currentUser = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "User not found"));
         user.getSubscribers().add(currentUser);
         return userRepository.save(user);
     }
 
     @Override
     public User unsubscribe(long userId, long id) {
-        User user=userRepository.findById(userId);
-        User currentUser=userRepository.findById(id);
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "User not found"));
+        User currentUser = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "User not found"));
         user.getSubscribers().remove(currentUser);
         return userRepository.save(user);
     }
 
     @Override
     public User findByUsername(@NotNull String username) {
-        return userRepository.findByUsername(username);
+        return userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "User not found"));
     }
 
     @Override
     public User register(@NotNull UserDto userDto) {
         User user = converter.convertToUser(userDto);
-        User existUser = userRepository.findByUsername(user.getUsername());
+        User existUser = userRepository.findByUsername(user.getUsername()).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "User not found"));
         if (existUser != null) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT, "User is exist");
@@ -112,7 +134,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User activateUser(@NotNull String code) {
-        User user = userRepository.findByActivationCode(code);
+        User user = userRepository.findByActivationCode(code).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "User not found"));
         try {
             if (user == null) {
                 throw new IllegalArgumentException("Invalid user activation code");
@@ -121,24 +144,30 @@ public class UserServiceImpl implements UserService {
             user.setActivate(true);
             User activatedUser = userRepository.save(user);
             return activatedUser;
-        }
-        catch (IllegalArgumentException ex)
-        {
+        } catch (IllegalArgumentException ex) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Access denied, user already activated or not registered", ex);
         }
     }
+
     @Override
     public User updateUser(UserDto userDto) {
         if (!userDto.getUsername().equals(getUsernameOfCurrentUser())) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN, "Access denied");
         }
-        User user = userRepository.findByUsername(userDto.getUsername());
+        User user = userRepository.findByUsername(userDto.getUsername()).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "User not found"));
         user.setLastName(userDto.getLastName());
         user.setName(userDto.getName());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         return userRepository.save(user);
+    }
+
+    @Override
+    public User findById(long id) {
+        return userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "User not found"));
     }
 
     private String getUsernameOfCurrentUser() {
@@ -152,4 +181,38 @@ public class UserServiceImpl implements UserService {
         return username;
     }
 
+    @Override
+    public ImagePath updatePhoto(@NotNull MultipartFile file, @NotNull String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "User not found"));
+        try {
+
+            if (file == null || file.getOriginalFilename().isEmpty()) {
+                throw new IllegalArgumentException("Problems with updating photos");
+            } else if (user == null || !user.getUsername().equals(getUsernameOfCurrentUser())) {
+                throw new AccessException("Access denied");
+            }
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdir();
+            }
+            String uuidFile = UUID.randomUUID().toString();
+            String resultFilename = uuidFile + "." + file.getOriginalFilename();
+            try {
+                file.transferTo(new File(uploadPath + "/" + resultFilename));
+                user.setPhotoUrl(resultFilename);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Photo can't be updated", ex);
+        } catch (AccessException ex) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN, "Access denied", ex);
+        }
+
+
+        return new ImagePath(userRepository.save(user).getPhotoUrl());
+    }
 }

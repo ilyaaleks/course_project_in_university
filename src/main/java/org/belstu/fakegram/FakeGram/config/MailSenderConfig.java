@@ -3,14 +3,12 @@ package org.belstu.fakegram.FakeGram.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 import java.util.Properties;
 
 @Configuration
-@PropertySource("classpath:db.properties")
 public class MailSenderConfig {
     @Value("${spring.mail.host}")
     private String host;

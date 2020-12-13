@@ -20,7 +20,7 @@ public class MarkController {
 
     @GetMapping("/like/count/{postId}")
     public ResponseEntity<MarkDto> getCountOfLike(@PathVariable() long postId,
-                                                  @RequestParam() String userId) {
+                                                  @RequestParam() long userId) {
         return ResponseEntity.ok(markService.getCountOfLike(postId, userId));
     }
 

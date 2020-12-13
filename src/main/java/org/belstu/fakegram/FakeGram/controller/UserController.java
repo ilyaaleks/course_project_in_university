@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.belstu.fakegram.FakeGram.domain.User;
 import org.belstu.fakegram.FakeGram.dto.UserDto;
 import org.belstu.fakegram.FakeGram.dto.UserPageDto;
+import org.belstu.fakegram.FakeGram.mapper.DtoConverter;
 import org.belstu.fakegram.FakeGram.service.UserService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -15,19 +16,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.file.attribute.UserPrincipalNotFoundException;
-import java.util.Set;
 
 @RestController()
 @RequestMapping("api/user")
 @AllArgsConstructor
 public class UserController {
     private UserService userService;
-
+    private DtoConverter converter;
     @GetMapping("/{id}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable() String id,
-                                               @AuthenticationPrincipal User currentUser) throws UserPrincipalNotFoundException {
+    public ResponseEntity<UserDto> getUserById(@PathVariable() long id,
+                                               @AuthenticationPrincipal User currentUser){
         User user = userService.findById(id);
-        user.setPhotoUrl(user.getPhotoUrl());
         UserDto userDto = converter.convertToUserDto(user);
         if (user.getSubscribers().contains(currentUser)) {
             userDto.setSubscribed(true);
@@ -42,42 +41,39 @@ public class UserController {
     @GetMapping("/subscribers/count/{userId}")
     public UserDto getCountOfSubscribers(@PathVariable() long userId) {
         final int countOfSubscribers = userService.getCountOfSubscribers(userId);
-        return
+        return UserDto.builder().countOfSubscribers(countOfSubscribers).build();
     }
 
     @GetMapping("/subscriptions/count/{userId}")
     public UserDto getCountOfSubscribtions(@PathVariable() long userId) {
-        final int countOfSubscribtions = userService.getCountOfSubscriptions(userId);
-        return;
+        final int countOfSubscriptions = userService.getCountOfSubscriptions(userId);
+        return UserDto.builder().countOfSubscriptions(countOfSubscriptions).build();
     }
 
     @GetMapping("/subscribers/{userId}")
     public UserPageDto getSubscribers(@PathVariable() long userId,
-                                      Pageable page) throws UserPrincipalNotFoundException {
-        final Set<User> subscribers = userService.getSubscribers(userId, page);
-        return
+                                      Pageable page){
+        return userService.getSubscribers(userId, page);
     }
 
     @GetMapping("/subscriptions/{userId}")
     public UserPageDto getSubscriptions(@PathVariable() long userId,
-                                        Pageable page) throws UserPrincipalNotFoundException {
-        final Set<User> subscriptions = userService.getSubscriptions(userId, page);
-        return
+                                        Pageable page){
+        return userService.getSubscriptions(userId, page);
     }
 
     @GetMapping("/subscribe")
     public UserDto subscribe(@RequestParam int userId,
                              @AuthenticationPrincipal User currentUser) throws UserPrincipalNotFoundException {
         final User user = userService.subscribe(userId, currentUser.getId());
-        return
-
+        return converter.convertToUserDto(user);
     }
 
     @GetMapping("/unsubscribe")
     public UserDto unsubscribe(@RequestParam int userId,
                                @AuthenticationPrincipal User currentUser) throws UserPrincipalNotFoundException {
         final User user = userService.unsubscribe(userId, currentUser.getId());
-        return
+        return converter.convertToUserDto(user);
     }
 
 }
