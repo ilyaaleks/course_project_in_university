@@ -2,9 +2,11 @@ package org.belstu.fakegram.FakeGram.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -34,6 +36,8 @@ public class Post {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="user_id")
     @NonNull
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private User author;
     @Column(name = "photo_path")
     @NonNull
@@ -43,10 +47,16 @@ public class Post {
     @NonNull
     private Date date;
     @ManyToMany(mappedBy = "posts",cascade = CascadeType.ALL, fetch= FetchType.EAGER)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Set<HashTag> hashTags;
     @OneToMany(mappedBy = "postComment",cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Set<Comment> comments;
     @OneToMany(mappedBy = "post",cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Set<Mark> marks;
 
 }

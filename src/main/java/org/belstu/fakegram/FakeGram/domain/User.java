@@ -2,9 +2,11 @@ package org.belstu.fakegram.FakeGram.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -55,8 +57,12 @@ public class User{
     @NonNull
     private String photoUrl;
     @OneToMany(mappedBy = "author",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private List<Mark> marks;
     @OneToMany(mappedBy = "author",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private List<Post> posts;
     @ManyToMany
     @JoinTable(
@@ -64,6 +70,8 @@ public class User{
             joinColumns = {@JoinColumn(name="subscriber_id")},
             inverseJoinColumns = {@JoinColumn(name="channel_id")}
     )
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Set<User> subscribers=new HashSet<>();
     @ManyToMany
     @JoinTable(
@@ -71,6 +79,8 @@ public class User{
             joinColumns = {@JoinColumn(name="channel_id")},
             inverseJoinColumns = {@JoinColumn(name="subscriber_id")}
     )
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Set<User> subscriptions=new HashSet<>();
 
 }

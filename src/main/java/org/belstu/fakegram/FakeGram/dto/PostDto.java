@@ -16,7 +16,6 @@ import java.util.Set;
 @NoArgsConstructor
 @RequiredArgsConstructor
 public class PostDto {
-    @NonNull
     private long id;
     @NonNull
     private long authorId;

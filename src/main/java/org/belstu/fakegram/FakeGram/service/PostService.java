@@ -6,6 +6,8 @@ import org.belstu.fakegram.FakeGram.dto.PostPageDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
+
 public interface PostService {
 
     PostPageDto getUserPosts(long userId, Pageable page);
@@ -14,7 +16,7 @@ public interface PostService {
 
     int countOfPosts(long userId);
 
-    Post savePost(long authorId, MultipartFile file, String hashTags, String text, User currentUser);
+    Post savePost(long authorId, MultipartFile file, String hashTags, String text, Principal currentUser);
 
     PostPageDto getSubscriptionPosts(long userId, Pageable pageable);
 

@@ -1,9 +1,11 @@
 package org.belstu.fakegram.FakeGram.domain;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -29,10 +31,14 @@ public class Mark {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "post_id")
     @NonNull
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Post post;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="user_id")
     @NonNull
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private User author;
     @Enumerated(EnumType.ORDINAL)
     @NonNull

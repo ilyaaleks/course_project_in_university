@@ -14,6 +14,7 @@ import org.belstu.fakegram.FakeGram.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -27,6 +28,7 @@ public class CommentServiceImpl implements CommentService {
     public final PostService postService;
     public final DtoConverter converter;
     @Override
+    @Transactional
     public CommentPageDto getCommentsOfPost(long postId, Pageable pageable) {
         final Page<Comment> page = commentRepository.findByPostId(postId, pageable);
         final List<Comment> commentList = page.getContent();
@@ -38,6 +40,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public CommentDto saveComment(CommentDto commentDto) {
         User user = userService.findById(commentDto.getUserId());
         Post post =postService.findById(commentDto.getPostId());

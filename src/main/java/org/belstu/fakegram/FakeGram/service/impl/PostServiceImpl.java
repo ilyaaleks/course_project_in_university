@@ -17,10 +17,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -44,16 +46,22 @@ public class PostServiceImpl implements PostService {
     private final UserService userService;
 
     @Override
+    @Transactional
     public PostPageDto getUserPosts(long userId, Pageable pageable) {
         Page<Post> page = postRepository.findByAuthor(userId, pageable);
         List<Post> postList = page.getContent();
-        final List<PostDto> postDtoList = postList.stream().map(converter::convertToPostDto).collect(Collectors.toList());
+        final List<PostDto> postDtoList = postList.stream().map(p -> {
+            final PostDto postDto = converter.convertToPostDto(p);
+            postDto.setId(p.getId());
+            return postDto;
+        }).collect(Collectors.toList());
         return new PostPageDto(postDtoList,
                 pageable.getPageNumber(),
                 page.getTotalPages());
     }
 
     @Override
+    @Transactional
     public PostPageDto getPostsByTag(long tagId, Pageable pageable) {
         Page<Post> page = postRepository.findByTag(tagId, pageable);
         List<Post> postList = page.getContent();
@@ -64,13 +72,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public int countOfPosts(long userId) {
         return 0;
     }
 
     @SneakyThrows
     @Override
-    public Post savePost(long authorId, MultipartFile file, String hashTags, String text, User currentUser) {
+    @Transactional
+    public Post savePost(long authorId, MultipartFile file, String hashTags, String text, Principal currentUser) {
         final Set<HashTag> tagList = new HashSet<>();
         final Post post = new Post();
         if (file != null) {
@@ -82,6 +92,8 @@ public class PostServiceImpl implements PostService {
             String resultFilename = uuidFile + "." + file.getOriginalFilename();
             file.transferTo(new File(uploadPath + "/" + resultFilename));
             post.setPhotoPath(resultFilename);
+            post.setText(text);
+            post.setAuthor(userService.findById(authorId));
             final Post savedPost = postRepository.save(post);
 
             if (!isEmpty(hashTags)) {
@@ -107,6 +119,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public PostPageDto getSubscriptionPosts(long userId, Pageable pageable) {
         Page<Post> page = postRepository.findBySubscription(userId, pageable);
         List<Post> postList = page.getContent();
@@ -122,6 +135,7 @@ public class PostServiceImpl implements PostService {
 
     @SneakyThrows
     @Override
+    @Transactional
     public Post update(MultipartFile file, long authorId, String hashTags, String text, long postId, User currentUser) {
         final Set<HashTag> tagList = new HashSet<>();
         final Post post = findById(postId);
@@ -157,11 +171,13 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public void delete(long id) {
         postRepository.deleteById(id);
     }
 
     @Override
+    @Transactional
     public Post findById(long postId) {
         return postRepository.findById(postId).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "Post can't be updated"));

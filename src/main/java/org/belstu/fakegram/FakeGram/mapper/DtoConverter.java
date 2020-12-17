@@ -28,7 +28,7 @@ public class DtoConverter {
     }
 
     public PostDto convertToPostDto(Post post) {
-        PostDto postDto = new PostDto(post.getId(), post.getAuthor().getId(), post.getAuthor().getUsername(), post.getPhotoPath(), post.getText(), post.getDate());
+        PostDto postDto = new PostDto(post.getAuthor().getId(), post.getAuthor().getUsername(), post.getPhotoPath(), post.getText(), new Date());
         postDto.setAuthorPhotoPath(post.getAuthor().getPhotoUrl());
         return postDto;
     }
@@ -55,7 +55,7 @@ public class DtoConverter {
     }
 
     public MarkDto convertToMarkDto(@NotNull Mark mark) {
-        return new MarkDto(mark.getId(), mark.getPost().getId(), mark.getAuthor().getId(), mark.getTypeOfVote(), mark.getDate());
+        return new MarkDto(mark.getPost().getId(), mark.getAuthor().getId(), mark.getTypeOfVote(), mark.getDate());
 
     }
 

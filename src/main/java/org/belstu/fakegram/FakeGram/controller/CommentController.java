@@ -14,17 +14,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api")
+@RequestMapping("api/comment")
 @AllArgsConstructor
 public class CommentController {
     private CommentService commentService;
-    @GetMapping("/comment/{postId}")
+    @GetMapping("/{postId}")
     public ResponseEntity<CommentPageDto> getCommentsOfPost(@PathVariable() long postId,
                                                             Pageable page) {
         return ResponseEntity.ok(commentService.getCommentsOfPost(postId,page));
     }
 
-    @PostMapping("/comment")
+    @PostMapping
     public ResponseEntity<CommentDto> saveComment(@RequestBody CommentDto commentDto) {
         if (commentDto != null) {
             return ResponseEntity.ok(commentService.saveComment(commentDto));

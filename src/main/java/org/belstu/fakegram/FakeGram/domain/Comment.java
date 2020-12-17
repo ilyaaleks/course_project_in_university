@@ -2,11 +2,21 @@ package org.belstu.fakegram.FakeGram.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.util.Date;
 
 @Entity
@@ -22,6 +32,8 @@ public class Comment {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "author_id")
     @NonNull
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private User author;
     @NonNull
     private String text;
@@ -30,5 +42,7 @@ public class Comment {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="post_id")
     @NonNull
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
     private Post postComment;
 }

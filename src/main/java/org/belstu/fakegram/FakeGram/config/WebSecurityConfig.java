@@ -22,7 +22,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private JwtAuthenticationEntryPoint unauthorizedHandler;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     private JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final String[] ENDPOINTS={"api/auth/**", "/signup","api/registration/**","api/image/**"};
+    private final String[] ENDPOINTS={"/api/auth/**", "/signup","/api/registration/**","/api/image/**","/api/registration","/api/registration/**"};
 
     public WebSecurityConfig(MyUserDetailsService userDetailsService, JwtAuthenticationEntryPoint unauthorizedHandler, BCryptPasswordEncoder bCryptPasswordEncoder, JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.userDetailsService = userDetailsService;

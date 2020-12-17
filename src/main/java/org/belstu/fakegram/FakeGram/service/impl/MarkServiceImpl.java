@@ -13,6 +13,7 @@ import org.belstu.fakegram.FakeGram.repository.UserRepository;
 import org.belstu.fakegram.FakeGram.service.MarkService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
@@ -27,6 +28,7 @@ public class MarkServiceImpl implements MarkService {
     private final DtoConverter converter;
 
     @Override
+    @Transactional
     public MarkDto getCountOfLike(long postId, long userId) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "Post not found"));
@@ -40,13 +42,12 @@ public class MarkServiceImpl implements MarkService {
             mark = new Mark(post, user, TypeOfVote.Nothing, new Date());
             likeRepository.save(mark);
         }
-        MarkDto likeOrDislikeDto = new MarkDto(mark.getId(), postId, userId, mark.getTypeOfVote(), mark.getDate());
-        likeOrDislikeDto.setCountOfLikes(countOfLikes);
-        likeOrDislikeDto.setCountOfDislikes(countOfDislikes);
+        MarkDto likeOrDislikeDto = new MarkDto(mark.getId(), postId, userId, mark.getTypeOfVote(), mark.getDate(),countOfLikes,countOfDislikes);
         return likeOrDislikeDto;
     }
 
     @Override
+    @Transactional
     public MarkDto saveLike(MarkDto markDto) {
         User user = userRepository.findById(markDto.getAuthorId()).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "User not found"));

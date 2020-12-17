@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
+import java.util.Date;
 
 @CrossOrigin(origins = "http://localhost:4200/", allowedHeaders = "*")
 @RestController
@@ -38,9 +40,14 @@ public class PostController {
                             @RequestParam long authorId,
                             @RequestParam String hashTags,
                             @RequestParam String text,
-                            @AuthenticationPrincipal User currentUser) throws IOException {
+                            Principal currentUser) throws IOException {
         final Post savedPost = postService.savePost(authorId, file, hashTags, text, currentUser);
         return converter.convertToPostDto(savedPost);
+    }
+    @GetMapping("/{id}")
+    public PostDto getPost(@PathVariable long id) throws IOException {
+        final Post post = postService.findById(id);
+        return new PostDto(post.getId(),post.getAuthor().getId(), post.getAuthor().getUsername(), post.getPhotoPath(), post.getText(), new Date(),post.getAuthor().getPhotoUrl(),null);
     }
 
     @GetMapping("/posts/{userId}")

@@ -39,7 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 logger.error("Authentication failed. Username and password not valid.", e);
             }
         } else {
-
+//            throw new PreAuthenticatedCredentialsNotFoundException("Bearer token has been lost");
         }
 
         if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -52,7 +52,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
-
         filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 
