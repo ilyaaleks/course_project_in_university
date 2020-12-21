@@ -23,9 +23,10 @@ import java.nio.file.attribute.UserPrincipalNotFoundException;
 public class UserController {
     private UserService userService;
     private DtoConverter converter;
+
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable() long id,
-                                               @AuthenticationPrincipal User currentUser){
+                                               @AuthenticationPrincipal User currentUser) {
         User user = userService.findById(id);
         UserDto userDto = converter.convertToUserDto(user);
         if (user.getSubscribers().contains(currentUser)) {
@@ -33,7 +34,21 @@ public class UserController {
         } else {
             userDto.setSubscribed(false);
         }
+        userDto.setPhotoUrl(user.getPhotoUrl());
+        return ResponseEntity.ok(userDto);
+    }
 
+    @GetMapping()
+    public ResponseEntity<UserDto> getUserByUsername(@RequestParam() String username,
+                                                     @AuthenticationPrincipal User currentUser) {
+        User user = userService.findByUsername(username);
+        UserDto userDto = converter.convertToUserDto(user);
+        if (user.getSubscribers().stream().map(User::getUsername).anyMatch((u) -> u.equals(currentUser.getUsername()))) {
+            userDto.setSubscribed(true);
+        } else {
+            userDto.setSubscribed(false);
+        }
+        userDto.setPhotoUrl(user.getPhotoUrl());
         return ResponseEntity.ok(userDto);
     }
 
@@ -52,13 +67,13 @@ public class UserController {
 
     @GetMapping("/subscribers/{userId}")
     public UserPageDto getSubscribers(@PathVariable() long userId,
-                                      Pageable page){
+                                      Pageable page) {
         return userService.getSubscribers(userId, page);
     }
 
     @GetMapping("/subscriptions/{userId}")
     public UserPageDto getSubscriptions(@PathVariable() long userId,
-                                        Pageable page){
+                                        Pageable page) {
         return userService.getSubscriptions(userId, page);
     }
 
@@ -66,14 +81,26 @@ public class UserController {
     public UserDto subscribe(@RequestParam int userId,
                              @AuthenticationPrincipal User currentUser) throws UserPrincipalNotFoundException {
         final User user = userService.subscribe(userId, currentUser.getId());
-        return converter.convertToUserDto(user);
+        final UserDto userDto = converter.convertToUserDto(user);
+        if (user.getSubscribers().stream().map(User::getUsername).anyMatch((u) -> u.equals(currentUser.getUsername()))) {
+            userDto.setSubscribed(true);
+        } else {
+            userDto.setSubscribed(false);
+        }
+        return userDto;
     }
 
     @GetMapping("/unsubscribe")
     public UserDto unsubscribe(@RequestParam int userId,
                                @AuthenticationPrincipal User currentUser) throws UserPrincipalNotFoundException {
         final User user = userService.unsubscribe(userId, currentUser.getId());
-        return converter.convertToUserDto(user);
+        final UserDto userDto = converter.convertToUserDto(user);
+        if (user.getSubscribers().stream().map(User::getUsername).anyMatch((u) -> u.equals(currentUser.getUsername()))) {
+            userDto.setSubscribed(true);
+        } else {
+            userDto.setSubscribed(false);
+        }
+        return userDto;
     }
 
 }
