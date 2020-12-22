@@ -46,6 +46,7 @@ public class PostServiceImpl implements PostService {
     private final UserService userService;
 
     @Override
+    @Transactional
     public PostPageDto getUserPosts(long userId, Pageable pageable) {
         Page<Post> page = postRepository.findByAuthor(userId, pageable);
         List<Post> postList = page.getContent();
@@ -70,12 +71,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public int countOfPosts(long userId) {
         return 0;
     }
 
 
     @Override
+    @Transactional
     public PostPageDto getSubscriptionPosts(long userId, Pageable pageable) {
         Page<Post> page = postRepository.findBySubscription(userId, pageable);
         List<Post> postList = page.getContent();
@@ -124,6 +127,7 @@ public class PostServiceImpl implements PostService {
 
     @SneakyThrows
     @Override
+    @Transactional
     public Post savePost(long authorId, MultipartFile file, String hashTags, String text, Principal currentUser) {
         final Set<HashTag> tagList = new HashSet<>();
         final Post post = new Post();
@@ -148,11 +152,13 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public void delete(long id) {
         postRepository.deleteById(id);
     }
 
     @Override
+    @Transactional
     public Post findById(long postId) {
         return postRepository.findById(postId).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "Post can't be updated"));
